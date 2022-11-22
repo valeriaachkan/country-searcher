@@ -3,6 +3,7 @@ import fetchCountries from './fetchCountries.js';
 import countryListTmpl from './templates/country-list.hbs';
 import countryInfoTmpl from './templates/country-info.hbs';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+// notiflix/build/notiflix-notify-aio
 
 const debounce = require('lodash.debounce');
 const DEBOUNCE_DELAY = 300;
@@ -14,7 +15,7 @@ const refs = {
 
 refs.searchInput.addEventListener('input', debounce(onSearchInput, DEBOUNCE_DELAY));
 
-function onSearchInput(e) {
+async function onSearchInput(e) {
 	e.preventDefault();
 
 	const query = e.target.value.trim();
@@ -23,17 +24,30 @@ function onSearchInput(e) {
 		return;
 	}
 
-	fetchCountries(query)
-		.then((data) =>
-			data.length <= 10 && data.length >= 2
+	try {
+		const data = await fetchCountries(query);
+		data.length <= 10 && data.length >= 2
 				? renderCountryList(data)
 				: data.length === 1
 				? renderCountry(data)
 				: data.length > 10
 				? onManyMatches()
 				: onFetchError()
-		)
-		.catch(onFetchError);
+	} catch {
+		onFetchError();
+	}
+
+	// fetchCountries(query)
+	// 	.then((data) =>
+	// 		data.length <= 10 && data.length >= 2
+	// 			? renderCountryList(data)
+	// 			: data.length === 1
+	// 			? renderCountry(data)
+	// 			: data.length > 10
+	// 			? onManyMatches()
+	// 			: onFetchError()
+	// 	)
+	// 	.catch(onFetchError);
 }
 
 function renderCountry(data) {
